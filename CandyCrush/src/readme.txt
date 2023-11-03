@@ -1,0 +1,1 @@
+It has:	everything, except the things it does not:It does not have:	Multiple classes for different types of flowers and bombs	Vertical clearing because i'm too lazy and its 2 easy to implement	Different icons	Good code..RUN:	javac Game.java GuiHandler.java	java Game
