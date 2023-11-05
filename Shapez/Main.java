@@ -33,12 +33,15 @@ public class Main {
         CuttingMachine knife = new CuttingMachine(true);
         knife.push(shape);
         shape = knife.pull(); // Rotated shape
+        shape2 = knife.pull(); // Rotated shape
 
         shape = mine.pull(); // Reset the shape
+        shape2 = mine.pull(); // Reset the shape
         knife.push(shape);
 
         knife.changeRotation(); // Rotate the other way
         shape = knife.pull();
+        shape2 = knife.pull();
 
         //
         // Gluing Machine
