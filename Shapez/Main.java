@@ -1,6 +1,7 @@
 public class Main {
     public static void main(String[] args){
         Shape shape = new Shape();
+        Shape shape2 = new Shape();
         System.out.println(shape.toString()); // Default shape
 
         //
@@ -39,5 +40,18 @@ public class Main {
         knife.changeRotation(); // Rotate the other way
         shape = knife.pull();
 
+        //
+        // Gluing Machine
+        // Glues the left figure into the right one
+        //
+
+        GluingMachine glue = new GluingMachine();
+        shape = mine.pull();
+        shape.setSegment(1, 0, Shape.Colors.Empty);
+        shape2 = mine.pull();
+        glue.push(shape);
+        glue.push(shape2);
+
+        shape = glue.pull();
     }
 }

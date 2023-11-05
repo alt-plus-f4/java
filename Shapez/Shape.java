@@ -26,6 +26,18 @@ public class Shape { // D
             }
         }
     }
+    Shape(Shape other){
+        this.segments = new Colors[nc][nr];
+
+        if(this != other){
+            for(int i = 0; i < nc; i++){
+                for(int j = 0; j < nr; j++){
+                    this.segments[j][i] = other.segments[j][i];
+                }
+            }
+        }
+    }
+
     public Colors[][] getSegments() {
         return segments;
     }

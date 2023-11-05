@@ -21,21 +21,40 @@ class CuttingMachine implements Machine {
     public Shape pull() {
         if(!bisItIn) return null;
 
-        Shape.Colors[][] segments = input.getSegments();
+        Shape.Colors[][] left = new Shape.Colors[2][2];
+        Shape.Colors[][] right = new Shape.Colors[2][2];
 
-        if(horizontalCut){ // TODO WAIT DISCORD
-            segments[0][0] = Shape.Colors.Empty;
-            segments[1][0] = Shape.Colors.Empty;
+        // Copy the contents from input.getSegments() to left and right
+        Shape.Colors[][] segments = input.getSegments();
+        for (int i = 0; i < 2; i++) {
+            for (int j = 0; j < 2; j++) {
+                left[i][j] = segments[i][j];
+                right[i][j] = segments[i][j];
+            }
+        }
+
+        if(horizontalCut){
+            left[0][0] = Shape.Colors.Empty;
+            left[0][1] = Shape.Colors.Empty;
+            right[1][0] = Shape.Colors.Empty;
+            right[1][1] = Shape.Colors.Empty;
+            System.out.println("Horizontal");
         }
         else{
-            segments[0][0] = Shape.Colors.Empty;
-            segments[0][1] = Shape.Colors.Empty;
+            left[0][0] = Shape.Colors.Empty;
+            left[1][0] = Shape.Colors.Empty;
+            right[0][1] = Shape.Colors.Empty;
+            right[1][1] = Shape.Colors.Empty;
+            System.out.println("Vertical");
         }
 
-        input.setSegments(segments);
-        System.out.println("Pulled shape CUTTING MACHINE:\n" + input.toString());
+        input.setSegments(left);
+        System.out.println("Pulled shape CUTTING MACHINE L:\n" + input.toString());
+        input.setSegments(right);
+        System.out.println("Pulled shape CUTTING MACHINE R:\n" + input.toString());
 
-        return input;
+        return input; //TODO FIND A WAY TO RETURN 2
     }
+
 
 }
