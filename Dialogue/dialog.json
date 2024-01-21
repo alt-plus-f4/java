@@ -1,0 +1,114 @@
+[
+  {
+    "id": "entrance",
+    "npcReply": "Welcome to Fantasytown. How can I help you?",
+    "playerOptions": [
+      {
+        "playerReply": "I want to buy armor.",
+        "nextStepId": "buyArmor",
+        "modifiers": [
+          {
+            "type": "Optional",
+            "condition": "CHA > 5",
+            "requirements": [
+              { "type": "Requirement", "value": "Medium bag of gold" }
+            ],
+            "rewards": [
+              { "type": "Reward", "value": "Light armor" },
+              { "type": "Reward", "value": "10 gold" }
+            ]
+          },
+          {
+            "type": "Optional",
+            "condition": "CHA <= 5",
+            "requirements": [
+              { "type": "Requirement", "value": "Small bag of gold" }
+            ],
+            "rewards": [
+              { "type": "Reward", "value": "Light armor" },
+              { "type": "Reward", "value": "5 gold" }
+            ]
+          }
+        ]
+      },
+      {
+        "playerReply": "I have slain the dragon.",
+        "nextStepId": "dragonSlayer",
+        "modifiers": [
+          {
+            "type": "Requirement",
+            "value": "Dragon Head"
+          },
+          {
+            "type": "Reward",
+            "value": "50 gold"
+          }
+        ]
+      },
+      {
+        "playerReply": "I want to speak with the king",
+        "nextStepId": "speakWithKing",
+        "modifiers": [
+          {
+            "type": "Optional",
+            "condition": "CHA > 10"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "buyArmor",
+    "npcReply": "I have some armors.",
+    "playerOptions": [
+      {
+        "playerReply": "Give me Light armor",
+        "modifiers": [
+          { "type": "Requirement", "value": "Medium bag of gold" },
+          { "type": "Reward", "value": "Light armor" },
+          { "type": "Reward", "value": "10 gold" }
+        ]
+      },
+      {
+        "playerReply": "Give me Light armor and don't cheat",
+        "modifiers": [
+          { "type": "Requirement", "value": "Small bag of gold" },
+          { "type": "Optional", "condition": "CHA >= 5" },
+          { "type": "Reward", "value": "Light armor" },
+          { "type": "Reward", "value": "5 gold" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "dragonSlayer",
+    "npcReply": "I have slain the dragon.",
+    "playerOptions": [
+      {
+        "playerReply": "Done. Anything else?",
+        "modifiers": [
+          { "type": "Requirement", "value": "Dragon Head" },
+          { "type": "Reward", "value": "50 gold" }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "speakWithKing",
+    "npcReply": "Optional: CHA > 10",
+    "playerOptions": [
+      {
+        "playerReply": "To marry your daughter"
+      },
+      {
+        "playerReply": "To end your tyranny"
+      }
+    ],
+    "modifiers": [
+      {
+        "type": "Optional",
+        "condition": "CHA > 10"
+      }
+    ]
+  }
+]
