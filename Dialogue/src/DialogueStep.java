@@ -20,11 +20,37 @@ class DialogueStep {
         this.nextStep = nextStep;
     }
 
+    public String getId() {
+        return id;
+    }
+
+    public String getNpcReply() {
+        return npcReply;
+    }
+
+    public DialogueStep getNextStep() {
+        return nextStep;
+    }
+
     public void setNextStep(DialogueStep nextStep) {
         this.nextStep = nextStep;
     }
 
+    public void setNpcReply(String npcReply) {
+        this.npcReply = npcReply;
+    }
+
     public void addPlayerOption(DialogueOption option) {
         playerOptions.add(option);
+    }
+
+    public List<DialogueOption> getPlayerOptions() {return playerOptions;}
+
+    @Override
+    public String toString() {
+        return "DialogueStep{" +
+                "id='" + id + '\'' +
+                ", npcReply='" + npcReply + '\'' +
+                '}';
     }
 }

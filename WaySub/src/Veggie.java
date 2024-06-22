@@ -1,0 +1,3 @@
+public enum Veggie {
+    TOMATO, PEPPER, OLIVES, LETTUCE, ONION, CUCUMBER
+}

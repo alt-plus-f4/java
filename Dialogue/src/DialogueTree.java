@@ -32,4 +32,11 @@ class DialogueTree {
 
         throw new Exception("NOT FOUND!");
     }
+
+    @Override
+    public String toString() {
+        return "DialogueTree{" +
+                "root=" + root +
+                '}';
+    }
 }

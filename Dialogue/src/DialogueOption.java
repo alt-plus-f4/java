@@ -29,4 +29,50 @@ class DialogueOption {
     public void setNextStep(DialogueStep nextStep) {
         this.nextStep = nextStep;
     }
+
+    public String getPlayerReply() {
+        return playerReply;
+    }
+
+    public void setPlayerReply(String playerReply) {
+        this.playerReply = playerReply;
+    }
+
+    public DialogueStep getNextStep() {
+        return nextStep;
+    }
+
+    public List<IOptional> getOptionalModifiers() {
+        return optionalModifiers;
+    }
+
+    public void setOptionalModifiers(List<IOptional> optionalModifiers) {
+        this.optionalModifiers = optionalModifiers;
+    }
+
+    public List<IReward> getRewardModifiers() {
+        return rewardModifiers;
+    }
+
+    public void setRewardModifiers(List<IReward> rewardModifiers) {
+        this.rewardModifiers = rewardModifiers;
+    }
+
+    public List<IRequirement> getRequirementModifiers() {
+        return requirementModifiers;
+    }
+
+    public void setRequirementModifiers(List<IRequirement> requirementModifiers) {
+        this.requirementModifiers = requirementModifiers;
+    }
+
+    @Override
+    public String toString() {
+        return "DialogueOption{" +
+                "playerReply='" + playerReply + '\'' +
+                ", optionalModifiers=" + optionalModifiers +
+                ", rewardModifiers=" + rewardModifiers +
+                ", requirementModifiers=" + requirementModifiers +
+                '}';
+    }
 }

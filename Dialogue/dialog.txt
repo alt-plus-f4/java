@@ -1,0 +1,13 @@
+entrance:Welcome to Fantasytown. How can I help you?:option1,option2,option3
+option1:I want to buy armor.:buyArmor
+option2:I have slain the dragon.:dragonSlayer
+option3:I want to speak with the king:speakWithKing
+buyArmor:I have some armors.:option4,option5
+option4:Give me Light armor:entrance:GOLD<10:Light armor,GOLD-10
+option5:Give me Light armor and don't cheat:entrance:GOLD<5,CHA>=5:Light armor,GOLD-5
+dragonSlayer:I have slain the dragon.:option6
+option6:Done. Anything else?:entrance::Dragon Head,GOLD+50
+speakWithKing:Hello there what tf u want:option7,option8,option9
+option7:To marry your daughter:null:CHA>15:
+option8:To end your tyranny:null::
+option9:Nothing just hanging around:entrance

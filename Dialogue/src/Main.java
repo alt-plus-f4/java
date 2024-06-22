@@ -1,88 +1,171 @@
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonValue;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.io.*;
+import java.util.*;
 
 public class Main {
     public static void main(String[] args) {
         try {
             Player player = new Player(100, 20, 15, 50);
-            DialogueTree dialogueTree = loadDialogueFromFile("dialog.json", player);
+            DialogueTree dialogueTree = loadDialogueFromFile("dialog.txt");
+            printDialogueTree(dialogueTree.root, new HashSet<>());
+
+            System.out.println(dialogueTree);
             playGame(player, dialogueTree);
         } catch (IOException e) {
-            System.out.println("Error: Dialogue file not found or invalid format.");
+            System.out.println("Error: Dialogue file not found.");
         }
     }
 
-    public static DialogueTree loadDialogueFromFile(String fileName, Player player) throws IOException {
-        try (InputStream is = new FileInputStream(fileName)) {
-            JsonArray jsonDialogue = Json.createReader(is).readArray();
-            List<DialogueStep> dialogueSteps = new ArrayList<>();
+    public static void printDialogueTree(DialogueStep step, Set<String> visited) {
+        if (step == null || visited.contains(step.getId())) {
+            return;
+        }
 
-            for (JsonValue jsonStep : jsonDialogue) {
-                JsonObject stepObject = (JsonObject) jsonStep;
+        System.out.println(step);
+        for (DialogueOption option : step.getPlayerOptions()) {
+            System.out.println(option);
+        }
 
-                String id = stepObject.getString("id");
-                String npcReply = stepObject.getString("npcReply");
-                JsonArray jsonPlayerOptions = stepObject.getJsonArray("playerOptions");
+        visited.add(step.getId());
 
-                DialogueStep dialogueStep = new DialogueStep(id, npcReply, null);
+        for (DialogueOption option : step.getPlayerOptions()) {
+            printDialogueTree(option.getNextStep(), visited);
+        }
+    }
 
-                for (JsonValue jsonOption : jsonPlayerOptions) {
-                    JsonObject optionObject = (JsonObject) jsonOption;
+    public static DialogueTree loadDialogueFromFile(String filename) throws IOException {
+        Map<String, DialogueStep> steps = new HashMap<>();
+        Map<String, DialogueOption> options = new HashMap<>();
+        List<String> lines = new ArrayList<>();
 
-                    String playerReply = optionObject.getString("playerReply");
-                    String nextStepId = optionObject.getString("nextStepId");
-                    JsonArray jsonModifiers = optionObject.getJsonArray("modifiers");
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+        }
 
-                    DialogueOption dialogueOption = new DialogueOption(playerReply, null);
+        for (String line : lines) {
+            String[] parts = line.split(":");
+            if (!parts[0].startsWith("option")) {
+                DialogueStep step = new DialogueStep(parts[0], parts[1], null);
+                steps.put(parts[0], step);
+            }
+        }
 
-                    for (JsonValue jsonModifier : jsonModifiers) {
-                        JsonObject modifierObject = (JsonObject) jsonModifier;
-                        String modifierType = modifierObject.getString("type");
-                        String modifierValue = modifierObject.getString("value");
+        for (String line : lines) {
+            String[] parts = line.split(":");
+            if (parts[0].startsWith("option")) {
+                DialogueStep nextStep = steps.get(parts[2]);
+                List<IRequirement> requirements = new ArrayList<>();
+                List<IReward> rewards = new ArrayList<>();
+                List<IOptional> optional = new ArrayList<>();
 
-                        switch (modifierType) {
-                            case "Optional":
-                                dialogueOption.addOptionalModifier(player -> player.CHA > Integer.parseInt(modifierValue));
-                                break;
-                            case "Requirement":
-                                dialogueOption.addRequirementModifier(player -> {
-                                    if (player.GOLD < Integer.parseInt(modifierValue)) {
-                                        throw new Exception("Not enough gold!");
-                                    }
-                                });
-                                break;
-                            case "Reward":
-                                dialogueOption.addRewardModifier(player -> {
-                                    player.GOLD += Integer.parseInt(modifierValue);
-                                    System.out.println("Received reward: " + modifierValue + " gold");
-                                });
-                                break;
-                        }
-                    }
-
-                    dialogueStep.addPlayerOption(dialogueOption);
-                    dialogueOption.setNextStepId(nextStepId);
+                if (parts.length > 3 && !parts[3].isEmpty()) {
+                    String[] requirementStrings = parts[3].split(",");
+                    for (String requirementString : requirementStrings)
+                        requirements.add(parseRequirement(requirementString));
                 }
 
-                dialogueSteps.add(dialogueStep);
-            }
+                if (parts.length > 4 && !parts[4].isEmpty()) {
+                    String[] rewardStrings = parts[4].split(",");
+                    for (String rewardString : rewardStrings)
+                        rewards.add(parseReward(rewardString));
+                }
 
-            if (dialogueSteps.isEmpty()) {
-                throw new IOException("Invalid dialogue file format.");
-            }
+                if (parts.length > 5 && !parts[5].isEmpty())
+                    optional.add(parseOptional(parts[5]));
 
-            return new DialogueTree(dialogueSteps.get(0));
+                DialogueOption option = new DialogueOption(parts[1], nextStep);
+
+                option.setOptionalModifiers(optional);
+                option.setRewardModifiers(rewards);
+                option.setRequirementModifiers(requirements);
+
+                options.put(parts[0], option);
+            }
+        }
+
+        for (String line : lines) {
+            String[] parts = line.split(":");
+            if (!parts[0].startsWith("option") && parts.length > 2) {
+                String[] optionIDs = parts[2].split(",");
+                DialogueStep step = steps.get(parts[0]);
+                for (String optionID : optionIDs) {
+                    DialogueOption option = options.get(optionID);
+                    if (option != null) {
+                        step.addPlayerOption(option);
+                    }
+                }
+            }
+        }
+
+        return new DialogueTree(steps.get("entrance"));
+    }
+
+    public static IOptional parseOptional(String optionalString) {
+        String[] parts = optionalString.split(" ");
+        String attribute = parts[0];
+        String operator = parts[1];
+        int value = Integer.parseInt(parts[2]);
+
+        return player -> {
+            int playerValue = player.getAttribute(attribute);
+
+            switch (operator) {
+                case ">":
+                    return playerValue > value;
+                case "<":
+                    return playerValue < value;
+                case "==":
+                    return playerValue == value;
+                default:
+                    throw new IllegalArgumentException("Unknown operator: " + operator);
+            }
+        };
+    }
+
+
+    private static IRequirement parseRequirement(String requirement) {
+        if (requirement.contains("<")) {
+            String[] parts = requirement.split("<");
+            return player -> {
+                int playerValue = player.getAttribute(parts[0]);
+                if (playerValue < Integer.parseInt(parts[1])) {
+                    throw new Exception("Not enough " + parts[0] + "!");
+                }
+            };
+        } else if (requirement.contains(">=")) {
+            String[] parts = requirement.split(">=");
+            return player -> {
+                int playerValue = player.getAttribute(parts[0]);
+                if (playerValue < Integer.parseInt(parts[1])) {
+                    throw new Exception("Not enough " + parts[0] + "!");
+                }
+            };
+        } else {
+            return player -> {
+                if (!player.inventory.contains(requirement)) {
+                    throw new Exception("You don't have the " + requirement + "!");
+                }
+            };
         }
     }
 
+    public static IReward parseReward(String rewardString) {
+        if (rewardString.contains("+") || rewardString.contains("-")) {
+            String[] parts = rewardString.split("[+-]");
+            String attribute = parts[0];
+            int value = Integer.parseInt(parts[1]);
+
+            if (rewardString.contains("+")) {
+                return player -> player.addAttribute(attribute, value);
+            } else {
+                return player -> player.addAttribute(attribute, -value);
+            }
+        } else {
+            return player -> player.inventory.add(rewardString);
+        }
+    }
 
     public static void playGame(Player player, DialogueTree dialogueTree) {
         DialogueStep currentStep = dialogueTree.root;
@@ -92,6 +175,8 @@ public class Main {
         while (currentStep != null) {
             System.out.println("Step ID: " + currentStep.id);
             System.out.println("NPC: " + currentStep.npcReply);
+            System.out.println("Player: " + player.HP + " HP, " + player.STR + " STR, " + player.CHA + " CHA, " + player.GOLD + " GOLD");
+            System.out.println("Inventory: " + player.inventory);
 
             int optionNumber = 1;
             for (DialogueOption option : currentStep.playerOptions) {
@@ -113,20 +198,20 @@ public class Main {
             DialogueOption selectedOption = currentStep.playerOptions.get(chosenOption - 1);
 
             try {
-                for (IRequirement modifier : selectedOption.requirementModifiers) {
-                    modifier.take(player);
+                for (IRequirement requirement : selectedOption.getRequirementModifiers()) {
+                    requirement.take(player);
                 }
 
-                for (IReward modifier : selectedOption.rewardModifiers) {
-                    modifier.reward(player);
+                for (IReward reward : selectedOption.getRewardModifiers()) {
+                    reward.reward(player);
                 }
 
-                currentStep = selectedOption.nextStep;
+                currentStep = selectedOption.getNextStep();
             } catch (Exception e) {
                 System.out.println("Error: " + e.getMessage());
             }
         }
 
-        System.out.println("Dialogue completed!");
+        System.out.println("bro ur ded lol gg no re m8 u suk lol gg ez clap or just an err");
     }
 }
